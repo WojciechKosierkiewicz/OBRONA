@@ -13,6 +13,95 @@ sieci zostałem jeszcze spytany o
 drugi model (ISO/OSI) i o jego
 warstwy
 
+# Opracowanie z dysku
+# Model warstwowy TCP/IP.
+## 1. Definicja i Architektura
+
+Model TCP/IP (Transmission Control Protocol / Internet Protocol) to **czterowarstwowy** model odniesienia, który jest standardem przemysłowym dla Internetu. W przeciwieństwie do modelu ISO/OSI (który jest modelem _koncepcyjnym_), TCP/IP jest modelem _implementacyjnym_.
+
+**Kluczowa cecha inżynierska:** Niezależność od medium transmisyjnego (może działać na światłowodzie, miedzi, falach radiowych) oraz niezależność od sprzętu.
+
+---
+## 2. Szczegółowy opis warstw (od góry)
+
+## **I. Warstwa Aplikacji (Application Layer)**
+Odpowiada za interfejs między użytkownikiem a siecią oraz kodowanie danych. W modelu TCP/IP łączy ona funkcje trzech górnych warstw modelu OSI (Aplikacji, Prezentacji, Sesji).
+- **Zadania szczegółowe:**
+    - Negocjacja formatu danych (np. MIME types w HTTP).
+    - Zarządzanie sesją (ustanawianie, utrzymanie, zrywanie logicznego połączenia).
+    - Szyfrowanie/Deszyfrowanie (np. TLS/SSL w HTTPS).
+- **Protokoły i porty (Well-known ports):**
+    - **SSH (22):** Szyfrowana sesja terminalowa.
+    - **DNS (53):** Rozwiązywanie nazw domenowych (UDP dla zapytań, TCP dla transferu stref).
+    - **HTTP/HTTPS (80/443):** Transfer hipertekstu.
+- **Jednostka danych:** Dane (Data) / Strumień (Stream).
+
+## **II. Warstwa Transportowa (Transport Layer)**
+Zapewnia logiczną komunikację **End-to-End** (między procesami na hostach, a nie między samymi hostami).
+- **Kluczowe mechanizmy:**
+    - **Multipleksacja:** Użycie **numerów portów** (16-bitowych, 0-65535) do rozróżniania usług uruchomionych na tym samym IP.
+    - **Kontrola przepływu (Flow Control):** Mechanizm **Sliding Window** (Okno przesuwne) w TCP – odbiorca informuje nadawcę, ile danych może jeszcze przyjąć (pole `Window Size` w nagłówku), by nie przepełnić bufora.
+    - **Kontrola zatorów (Congestion Control):** Algorytmy (np. TCP Reno, CUBIC) zapobiegające zapchaniu routerów po drodze (mechanizm Slow Start).
+- **Protokoły:**
+    1. **TCP (Transmission Control Protocol):**
+        - Połączeniowy (3-way handshake: SYN -> SYN-ACK -> ACK).
+        - Niezawodny (Potwierdzenia ACK, retransmisje po timeoutcie).
+        - Uporządkowany (Sequence Numbers w nagłówku pozwalają złożyć pakiety w dobrej kolejności).
+    2. **UDP (User Datagram Protocol):**
+        - Bezpoczątkowy (Connectionless), brak gwarancji dostarczenia, minimalny narzut (nagłówek ma tylko 8 bajtów).
+- **Jednostka danych:** Segment (TCP) / Datagram (UDP).
+
+## **III. Warstwa Internetowa (Internet Layer)**
+Odpowiada za logiczne adresowanie (IP) i routing (wybór trasy) pakietów przez różne sieci (Inter networking). Działa w trybie "best-effort" (nie gwarantuje dostarczenia – to rola wyższej warstwy TCP).
+
+- **Protokoły:**
+    - **IP (IPv4 / IPv6):**
+        - **IPv4:** Adres 32-bitowy. Nagłówek zawiera m.in. `TTL` (Time To Live) – licznik, który zmniejsza się o 1 na każdym routerze. Gdy osiągnie 0, pakiet jest odrzucany (zapobiega pętlom w routingu).
+        - **Fragmentacja:** Jeśli pakiet jest większy niż MTU (Maximum Transmission Unit) łącza, router dzieli go na mniejsze kawałki (fragmenty).
+    - **ICMP (Internet Control Message Protocol):** Protokół diagnostyczny (używany przez `ping` i `traceroute`). Zgłasza błędy (np. "Destination Unreachable", "TTL Exceeded").
+    - **ARP (Address Resolution Protocol):** Mapuje logiczny adres IP na fizyczny adres MAC w sieci lokalnej (działa na granicy warstwy 2 i 3).
+- **Jednostka danych:** Pakiet (Packet).
+    
+
+## **IV. Warstwa Dostępu do Sieci (Network Access Layer)**
+
+Najniższa warstwa, odpowiadająca za fizyczne przesłanie bitów do medium i sterowanie dostępem do tego medium (MAC - Media Access Control). W modelu OSI odpowiada warstwom Łącza Danych i Fizycznej.
+- **Zadania:**
+    - Adresowanie fizyczne (Adres MAC – 48-bitowy).
+    - Detekcja błędów w ramce (suma kontrolna CRC/FCS na końcu ramki).
+    - Framing (oznaczanie początku i końca ramki).
+- **Technologie:** Ethernet (IEEE 802.3), Wi-Fi (IEEE 802.11).
+- **Jednostka danych:** Ramka (Frame).
+
+---
+## 3. Proces Enkapsulacji (Szczegóły nagłówków)
+1. **Dane:** `[HTTP Request]`
+2. **Segment TCP:** `[Port Źródłowy | Port Docelowy | Sekwencja | ... ] + [Dane]`
+3. **Pakiet IP:** `[IP Źródłowe | IP Docelowe | TTL | Protokół (TCP) ] + [Segment]`
+4. **Ramka Ethernet:** `[MAC Docelowy | MAC Źródłowy | EtherType (IP)] + [Pakiet] + [Suma CRC]`
+
+**Ważny szczegół:** Routery pośredniczące w Internecie "rozpakowują" dane tylko do warstwy 3 (IP), modyfikują TTL, przeliczają sumę kontrolną nagłówka IP i pakują w nową ramkę (z nowym adresem MAC kolejnego routera). Warstwa Transportowa (4) jest analizowana dopiero u odbiorcy (End-to-End).
+
+---
+
+## 4. Porównanie TCP/IP vs OSI (Tabela techniczna)
+
+|Warstwa modelu OSI (7)|Odpowiednik w TCP/IP (4)|Funkcja i protokoły|
+|---|---|---|
+|**7. Aplikacji**|**Aplikacji**|Procesy sieciowe dla aplikacji (HTTP, FTP, SMTP)|
+|**6. Prezentacji**|_(włączona w Aplikacji)_|Formatowanie danych, szyfrowanie (SSL/TLS), kompresja|
+|**5. Sesji**|_(włączona w Aplikacji)_|Zarządzanie sesjami między aplikacjami (RPC)|
+|**4. Transportowa**|**Transportowa**|Host-to-Host, niezawodność (TCP, UDP, SCTP)|
+|**3. Sieciowa**|**Internetowa**|Adresowanie logiczne i routing (IP, ICMP, IPSec, IGMP)|
+|**2. Łącza Danych**|**Dostępu do sieci**|Adresowanie fizyczne (MAC), obsługa błędów ramki (Ethernet, PPP)|
+|**1. Fizyczna**|**Dostępu do sieci**|Sygnały elektryczne/optyczne, okablowanie, złącza|
+
+1. **Na czym polega MTU i MSS?**
+    - **MTU (Maximum Transmission Unit):** Maksymalny rozmiar ramki (zazwyczaj 1500 bajtów dla Ethernetu).
+    - **MSS (Maximum Segment Size):** Maksymalna ilość danych w segmencie TCP (MTU minus nagłówki IP i TCP). Negocjowane podczas 3-way handshake.
+2. **Jaka jest różnica między switchem (L2) a routerem (L3)?**
+    - Switch (przełącznik) działa na adresach MAC (warstwa Dostępu do sieci) i przesyła ramki tylko w obrębie jednej sieci lokalnej.
+    - Router działa na adresach IP (warstwa Internetowa) i przenosi pakiety _pomiędzy_ różnymi sieciami.
 # opracowanie
 Pierwszy z nich, model **TCP/IP** określany jest jako **model protokołów.** Każda z jego warstw wykonuje konkretne zadania, do realizacji który wykorzystywane są konkretne protokoły. Model **ISO/OSI** natomiast zwany **modelem odniesienia**, stosowany jest raczej do analizy, która pozwala lepiej zrozumieć procesy komunikacyjne zachodzące w sieci oraz stanowi wzór do projektowania rozwiązań sieciowych zarówno sprzętowych jak i programowych.
 
