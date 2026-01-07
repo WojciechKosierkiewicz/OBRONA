@@ -19,3 +19,4 @@ o ich działaniu i o programowaniu
 takich układów) i to nawet jakoś
 niespecjalnie szczegółowo.
 Brak pytań.
+# SADGE NIE MA OPRACOWANIA NA DYSKU
