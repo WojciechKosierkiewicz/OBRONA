@@ -10,7 +10,7 @@ PYTANIA KIERUNKOWE
 9. ![[Programowalne scalone układy cyfrowe PLD, CPLD oraz FPGA]]
 10. ![[Fizyczne nośniki danych – stosowane technologie, struktury oraz metody kodowania informacji]]
 PYTANIA SPECJALNOŚCIOWE
-11. Struktury medycznych systemów informatycznych – porównanie, wady i zalety.
+11. ![[Struktury medycznych systemów informatycznych – porównanie, wady i zalety.]]
 12. ![[Gromadzenie informacji medycznych - klasyfikacje, rekordy pacjenta]]
 13. Metody tworzenia harmonogramu projektu.
 14. Zarządzanie ryzykiem i jakością w projekcie.
