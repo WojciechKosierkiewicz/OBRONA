@@ -3,7 +3,7 @@
 
 ## 1. Generowanie obrazu (Wprowadzenie)
 
-Ray Tracing to technika z rodziny **Global Illumination** (Oświetlenie Globalne). W przeciwieństwie do lokalnych modeli (jak w starej rasteryzacji), tutaj obiekty "wiedzą o sobie" nawzajem (odbicia, cienie rzucane przez inne obiekty).
+Ray Tracing to technika z rodziny **Global Illumination** (Oświetlenie Globalne). W przeciwieństwie do modeli lokalnych, jak rasteryzacja, Ray Tracing uwzględnia **wzajemne oddziaływanie optyczne** pomiędzy obiektami w scenie. Algorytm w dużym skrócie polega na wyznaczaniu koloru piksela na podstawie rekursywnego śledzenia ścieżek promieni.
 
 **Kluczowa różnica:**
 - **Rasteryzacja (Klasyczna):** Rzutujemy trójkąty na ekran (Object-order). Szybka, ale słaba w odbiciach.
@@ -13,17 +13,21 @@ Ray Tracing to technika z rodziny **Global Illumination** (Oświetlenie Global
 
 ## 2. Algorytm Śledzenia Promieni (Krok po kroku)
 Proces dla pojedynczego piksela $(x,y)$:
-1. **Generacja promienia:** Tworzysz wektor $D$ od oka przez punkt na ekranie $(x,y)$.
-2. **Szukanie przecięcia (Intersection):**
-    - Testujesz promień z _każdym_ obiektem na scenie (z użyciem struktur przyspieszających).
-    - Wybierasz ten obiekt, który jest **najbliżej** (najmniejsze $t > 0$).
-3. **Obliczenie koloru (Shading):**
-    - W punkcie trafienia liczysz tzw. **Model Oświetlenia Lokalnego** (np. Phonga) – patrz punkt 3.
-4. **Rekurencja (Promienie wtórne):**
-    - Jeśli obiekt jest lustrzany -> generujesz **promień odbity** ($R$).
-    - Jeśli przezroczysty -> generujesz **promień załamany** ($T$).
-    - Generujesz **promienie cienia** (Shadow Rays) do każdego źródła światła, by sprawdzić, czy punkt jest widoczny dla światła.
-5. **Stop:** Gdy osiągniesz limit odbić (np. 5) lub waga promienia spadnie prawie do zera.
+1. **Generacja promienia:** Z punktu w którym znajduje się obserwator wyprowadzany jest promień pierwotny, który przecina rzutnię (w punkcie $(x,y)$).
+2. **Szukanie przecięcia (Intersection):** Wyszukiwany jest najbliższy punkt przecięcia z obiektami znajdujacymi się na scenie, żeby nie przeszukiwać wszystkich możliwych obiektów i uprościć ilość obliczeń stosuje się **struktury podziału przestrzeni**: Najlepszym przykładem takiej struktury jest **drzewo brył ograniczających (BVH)**. 
+	- na początku grupuje się obiekty w duże, prostsze bryły (np sześciany). 
+	- pozwala to najpierw sprawdzić czy promień w ogóle trafia w dane miejsce na scenie, 
+	- jeśli nie od razu możemy zignorować wszystkie obiekty w środku, 
+	- w przeciwnym wypadku skupiamy się na zawartości bryły.
+	![[BVH.png]]
+		(Jakby się chcieć bardzo spocić można dodać że skraca to złożoność przeszukiwania sceny z O(n) do O(log n))
+3. **Obliczenie koloru (Shading):** Dla znalezionego punktu obliczany jest wpływ źródeł światła (model Phonga/Lamberta). W tym kroku wysyłane są tzw. **promienie cienia (shadow rays)** do źródeł światła, aby sprawdzić, czy punkt nie jest zasłonięty.
+4. **Rekurencja (Promienie wtórne):** Jeśli obiekt jest lustrzany lub przeźroczysty, generowane są promienie odbite/załamane. Algorytm powtarza dla nich kroki 2-4, a wynikowy kolor jest sumowany z kolorem obliczonym w kroku 3
+5. **Stop:** Śledzenie promienia dla danej ścieżki kończy się, gdy:
+	- promień nie trafi w żaden obiekt (ucieczka w tło),
+	- zostanie osiągnięta maksymalna liczba odbić (zabezpieczenie przed pętlą nieskończoną),
+	- trafimy na obiekt matowy (który nie generuje promieni lustrzanych/przeźroczystych),
+	- wystąpi całkowite wewnętrzne odbicie (wtedy nie generujemy promienia załamanego, co kończy tę konkretną gałąź).
 
 ---
 ## 3. Model Oświetlenia Phonga (Phong Lighting Model)
@@ -51,10 +55,12 @@ Częste pytanie o różnicę między modelem oświetlenia a metodą cieniowania 
     - _Zaleta:_ Idealnie gładkie odblaski.
     - _Wada:_ Wolniejsze (ale w dobie GPU to standard).
 
----
 
+Śledzenie promieni nie jest jednak metodą idealną. Duża ilość obliczeń wymaga znacznych zasobów komputera, przez co jeszcze niedawno rzeczywiste wykorzystanie tego algorytmu nie było możliwe, poza sprzętem specjalistycznym. Generowanie pełnego obrazu wymaga ustalenia koloru osobno dla każdego z widocznych na ekranie pikseli. Dodatkowo, ze względu na zasadę działania, algorytm ten nie jest w stanie obsługiwać światła rozproszonego, symulować dyfrakcji lub rozszczepienia światła.
+
+*na tym można zakończyć, ostatni punkt wydaje się opcjonalny*
 ## 5. Zaawansowane pojęcia (BRDF i Sampling)
-- **BRDF (Dwukierunkowa Funkcja Rozkładu Odbicia):**​
+- **BRDF (Dwukierunkowa Funkcja Rozkładu Odbicia):**
     - To matematyczny opis materiału. Funkcja $f(L, V)$, która mówi: "jeśli światło pada z kierunku $L$, to ile procent energii odbije się w kierunku oka $V$?".
     - Dla lustra BRDF to "szpilka" (odbija tylko w jednym kierunku). Dla kartki papieru to półkula (rozprasza wszędzie).
 - **Super-sampling / Antyaliasing:**
