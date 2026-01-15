@@ -16,7 +16,7 @@ Bardziej złożone, bazują na makrokomórkach, które są łączone w bloki fun
 - **Blok funkcyjny** – grupa makrokomórek połączonych wspólną strukturą połączeń.
 - **Przeniesienie (carry)** – mechanizm umożliwiający szybkie przekazywanie informacji między makrokomórkami, np. w operacjach arytmetycznych.
 
-### **FPGA** 
+### FPGA 
 Najbardziej złożone z układów PLD, bazujące na macierzy bloków logicznych z możliwością bezpośredniego programowania. Dodatkowo, zawierają bloki RAM, co pozwala na tworzenie tablic wartości LUT (ang look-up table). FPGA zawierają znacznie większe ilości bloków logicznych od innych typów PLD, a dodatkowo bloki IOB (ang. input-output block) również oferują możliwości programowania.
 
 **Pojęcia kluczowe:**
