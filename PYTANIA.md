@@ -17,6 +17,6 @@ PYTANIA SPECJALNOŚCIOWE
 15. ![[Wymień składowe modelu matematycznego opisującego obraz cyfrowy wraz z krótkim ich opisem]]
 16. ![[Zadania i metody cyfrowego przetwarzania sygnałów i obrazów biomedycznych]]
 17. ![[Modelowanie procesów farmakokinetycznych]]
-18. Eksploracja danych medycznych.
+18. ![[Eksploracja danych medycznych.]]
 19. ![[Prawne aspekty przetwarzania danych medycznych]]
 20. HTTP we wzorcu architektonicznym REST
