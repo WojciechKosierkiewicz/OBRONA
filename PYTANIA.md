@@ -19,4 +19,4 @@ PYTANIA SPECJALNOŚCIOWE
 17. ![[Modelowanie procesów farmakokinetycznych]]
 18. ![[Eksploracja danych medycznych.]]
 19. ![[Prawne aspekty przetwarzania danych medycznych]]
-20. HTTP we wzorcu architektonicznym REST
+20. ![[HTTP we wzorcu architektonicznym REST]]
